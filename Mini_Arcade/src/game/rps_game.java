@@ -1,17 +1,29 @@
+package game;
 
-
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Statement;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
-class rps extends JFrame {
+import member.Login;
+
+public class rps_game extends JFrame {
+//	public static void main(String[] args) {
+//		new rps_game();
+//	}
+
 	ImageIcon[] gbb = { new ImageIcon("./imagefile/scissors.png"), new ImageIcon("./imagefile/rock.png"),
 			new ImageIcon("./imagefile/paper.png") };
 	JButton[] btn = new JButton[gbb.length];
@@ -21,25 +33,19 @@ class rps extends JFrame {
 
 	int sum;
 	int count = 0;
+	String userid;
 
-	//DB 연동
-	Connection con;
-	Statement stmt;
-	PreparedStatement pstmtInsert;
-	
 	private String driver = "org.gjt.mm.mysql.Driver";
-	private String url = "jdbc:mysql://localhost:3306/test";
-	private String user = "root";
-	private String pwd = "0823";
-	
-	private String sqlInsert = "insert into gamescore values(?,?,?,?,?,?)";
+	private String url = "jdbc:mysql://rds-mysql.co5xhdkdttkm.ap-northeast-2.rds.amazonaws.com:3306/mini_arcade_db";
+	private String user = "useruser";
+	private String pwd = "123useruser";
 
-	public rps() {
+	public rps_game(String id) {
+		userid=id;
 		this.setTitle("가위 바위 보 게임");
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		JPanel northPanel = new JPanel();
 		
+		JPanel northPanel = new JPanel();
+
 		northPanel.setBackground(Color.ORANGE);
 
 		JPanel centerPanel = new JPanel();
@@ -58,52 +64,56 @@ class rps extends JFrame {
 
 		this.add(northPanel, BorderLayout.NORTH);
 		this.add(centerPanel, BorderLayout.CENTER);
-		this.setSize(800, 600);
-		this.setVisible(true);
+
+		//this.setUndecorated(true); //상단바 없애기
 		
-		dbConnect();
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setSize(800, 600);
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
+
 	}
-	private void dbConnect() {
+
+	private Connection dbConnect() {
+		Connection con = null;
+
 		try {
-			Class.forName(driver);
-			con = DriverManager.getConnection(url, user, pwd);
-			stmt = con.createStatement();
-			pstmtInsert = con.prepareStatement(sqlInsert);
-			
-		} catch (Exception e) {
+			Class.forName(driver); // 1. 드라이버 로딩
+			con = DriverManager.getConnection(url, user, pwd); // 2. 드라이버 연결
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		return con;
 	}
-	
+
 	private void add() {
-		Boolean tf;
+		Connection con = null; // 연결
+		PreparedStatement pstmtUpdate = null; // 명령
+
 		try {
-/* 1 GameID (INT)
- * 2 GameName (VARCHAR)
- * 3 GameScore (INT)
- * 4 TotalScore (INT)
- * 5 UserID (VARCHAR)
- * 6 Nickname(VARCHAR)*/
+			con = dbConnect();
+			String sqlUpdate = "update Game_Score set gameScore=? where gameID=? and UserID=?";
 			
-			String strGameID = "01"; //01: 가위바위보, 02: 숫자두더지, 03: 스네이크, 04: 테트리스
-			String strGameName = "RockPaperScissors";
-			String strGameScore = Integer.toString(sum);
-			String strUserID = "karam";
-			String strNick = Util.toLatin("가람");
-			
-			pstmtInsert.setInt(1, Integer.parseInt(strGameID));
-			pstmtInsert.setString(2, strGameName);
-			pstmtInsert.setString(3, strUserID);
-			pstmtInsert.setString(4, strNick);
-			pstmtInsert.setInt(5, Integer.parseInt(strGameScore));
-			pstmtInsert.setInt(6, Integer.parseInt(strGameScore));
-			pstmtInsert.executeUpdate();
+			String strUserID = userid;
+			pstmtUpdate = con.prepareStatement(sqlUpdate);
+			pstmtUpdate.setInt(1, sum);
+			pstmtUpdate.setInt(2, 01);
+			pstmtUpdate.setString(3, strUserID);
+
+			int r = pstmtUpdate.executeUpdate(); // 실행 -> 저장
+			if (r > 0) {
+				System.out.println("가위바위보 게임 SCORE 추가 성공");
+				
+			} else {
+				System.out.println("실패");
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		JOptionPane.showMessageDialog(null, "추가 성공");
 	}
-	
+
 	public void draw(Icon m, Icon c, String w) {
 		me.setIcon(m);
 		com.setIcon(c);
@@ -111,9 +121,10 @@ class rps extends JFrame {
 	}
 
 	public void set_score(int score) {
-		sum = sum+score;
+		sum = sum + score;
 		System.out.println(sum);
 	}
+
 	public void countplus() {
 		count++;
 	}
@@ -203,11 +214,5 @@ class TimerRunnable extends Thread implements Runnable {
 				return;
 			}
 		}
-	}
-}
-
-public class rps_game {
-	public static void main(String[] args) {
-		new rps();
 	}
 }
