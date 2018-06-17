@@ -68,7 +68,7 @@ public class rps_game extends JFrame {
 		//this.setUndecorated(true); //상단바 없애기
 		
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.setSize(800, 600);
+		this.setSize(800, 580);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 
@@ -181,8 +181,9 @@ public class rps_game extends JFrame {
 						return;
 				}
 			} else {
-				JOptionPane.showMessageDialog(null, "10번의 가위바위보 게임이 끝났습니다.");
 				add();
+				dispose();
+				JOptionPane.showMessageDialog(null, "GAME OVER, your score "+sum);
 			}
 		}
 	}

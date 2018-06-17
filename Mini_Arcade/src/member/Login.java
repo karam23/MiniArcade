@@ -11,6 +11,8 @@ import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -22,7 +24,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
-import game.snake_game;
+import game.GameMain;
 
 public class Login extends JFrame implements ActionListener {
 
@@ -31,6 +33,8 @@ public class Login extends JFrame implements ActionListener {
 	private JPasswordField pwd_field;
 	private JPanel paneltxt, panelbtn;
 	private JButton login_btn, join_btn;
+	
+	String combo="ENG";
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -47,12 +51,13 @@ public class Login extends JFrame implements ActionListener {
 
 	public Login() {
 		// UI 부분
-
+		setTitle("Mini Arcade Login");
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
+		// TXT
 		paneltxt = new JPanel();
 		contentPane.add(paneltxt, BorderLayout.CENTER);
 		GridLayout gbl_panel = new GridLayout(3, 2);
@@ -75,11 +80,25 @@ public class Login extends JFrame implements ActionListener {
 		JLabel lang_label = new JLabel("LANGUAGE: ");
 		paneltxt.add(lang_label);
 
+		// 콤보박스
 		String CBlang[] = { "English", "한국어", "中文" };
 		JComboBox comboBox = new JComboBox(CBlang);
 		comboBox.setPreferredSize(new Dimension(100, 20));
 		paneltxt.add(comboBox);
 
+		comboBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent ev) {
+				Object obj = ev.getItem();
+				if (obj.equals("English")) {
+					combo="ENG";
+				} else if (obj.equals("한국어")) {
+					combo="KOR";
+				} else if (obj.equals("中文")) {
+					combo="CHI";
+				}
+			}
+		});
+		// 버튼
 		// 하단 panel2생성
 		panelbtn = new JPanel();
 		contentPane.add(panelbtn, BorderLayout.SOUTH);
@@ -95,7 +114,7 @@ public class Login extends JFrame implements ActionListener {
 		panelbtn.add(join_btn);
 		join_btn.addActionListener(this);
 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setSize(300, 170);
 		setLocationRelativeTo(null);
 		setVisible(true);
@@ -129,32 +148,24 @@ public class Login extends JFrame implements ActionListener {
 			if (id.equalsIgnoreCase("root") && pwd.equalsIgnoreCase("1234")) {
 				System.out.println("Root Login");
 				JOptionPane.showMessageDialog(login_btn, "Loged-in as an admin!");
+				this.dispose();// System.exit(0);
 				new Member_List();
-				this.dispose();//System.exit(0);
-			}else {
+			} else {
 				JOptionPane.showMessageDialog(null, "Login success");
-				//new rps_game(id); //가위바위보 01
-				//new numnumnum(id); //숫자두더지 02
-				new snake_game(id); //스네이크
-				//메인창 가도록 구현바람	
-				//main(id);
-				this.setVisible(false);//System.exit(0);
-				// 이부분에 게임 메인창으로 가도록 구현해 주세요 일단은 루트 계정이 Member List로 가도록 했습니다 by라운
-				/*
-				 * if(id.equals(getid) && pwd.equals(getpwd)) {
-				 * System.out.println("Member Login"); JOptionPane.showMessageDialog(login_btn,
-				 * "Successful Login!"); //new 페키지.들어갈 페이지(); }
+				new GameMain(id, combo);
+				this.setVisible(false);// System.exit(0);
+				/*if(id.equals(getid) && pwd.equals(getpwd)) {
+				 System.out.println("Member Login"); JOptionPane.showMessageDialog(login_btn, "Successful Login!"); //new 페키지.들어갈 페이지();
+				 }
 				 */
-			}		
+				 
+			}
 		} else {
-			JOptionPane.showMessageDialog(null, "Login failed");
+			JOptionPane.showMessageDialog(null, "Plz enter vaild ID or Password");
+			System.out.println("Invalid Login");
+			//JOptionPane.showMessageDialog(login_btn, "Plz enter vaild ID or Password");
 		}
 
-		/*
-		 * else { System.out.println("Invalid Login");
-		 * JOptionPane.showMessageDialog(login_btn, "Plz enter vaild ID or Password"); }
-		 */
-		
 	}
 
 	public void memberjoin() {

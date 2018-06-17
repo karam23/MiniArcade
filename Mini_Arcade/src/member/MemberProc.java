@@ -63,6 +63,20 @@ public class MemberProc extends JFrame implements ActionListener {
 		this.mList = mList;
 	}// 생성자
 
+	public MemberProc(String id) { // 가입자의 수정/삭제용 생성자
+		createUI();
+		btnInsert.setEnabled(false);
+		btnInsert.setVisible(false);
+		//this.mList = mList;
+
+		System.out.println("id=" + id);
+
+		MemberDAO dao = new MemberDAO();
+		MemberDTO vMem = dao.getMemberDTO(id);
+		viewData(vMem);
+
+	}// id를 가지고 생성
+	
 	public MemberProc(String id, Member_List mList) { // 수정/삭제용 생성자
 		createUI();
 		btnInsert.setEnabled(false);
@@ -102,7 +116,7 @@ public class MemberProc extends JFrame implements ActionListener {
 
 	private void createUI() {
 		//mList = new Member_List();
-		this.setTitle("회원정보");
+		this.setTitle("User Info");
 		gb = new GridBagLayout();
 		setLayout(gb);
 		gbc = new GridBagConstraints();
@@ -111,29 +125,29 @@ public class MemberProc extends JFrame implements ActionListener {
 		gbc.weighty = 2.0;
 
 		// 아이디
-		JLabel bId = new JLabel("아이디 : ");
+		JLabel bId = new JLabel("ID : ");
 		tfId = new JTextField(20);
 		// 그리드백에 붙이기
 		gbAdd(bId, 0, 0, 1, 1);
 		gbAdd(tfId, 1, 0, 3, 1);
 
 		// 비밀번호
-		JLabel bPwd = new JLabel("비밀번호 : ");
+		JLabel bPwd = new JLabel("Password : ");
 		pfPwd = new JPasswordField(20);
 		gbAdd(bPwd, 0, 1, 1, 1);
 		gbAdd(pfPwd, 1, 1, 3, 1);
 
 		// 이름
-		JLabel bName = new JLabel("이름 :");
+		JLabel bName = new JLabel("Name :");
 		tfName = new JTextField(20);
 		gbAdd(bName, 0, 2, 1, 1);
 		gbAdd(tfName, 1, 2, 3, 1);
 
 		// 성별
-		JLabel bGender = new JLabel("성별 : ");
+		JLabel bGender = new JLabel("Gender : ");
 		JPanel pGender = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		rbMan = new JRadioButton("남", true);
-		rbWoman = new JRadioButton("여", true);
+		rbMan = new JRadioButton("Man", true);
+		rbWoman = new JRadioButton("Woman", true);
 		ButtonGroup group = new ButtonGroup();
 		group.add(rbMan);
 		group.add(rbWoman);
@@ -143,17 +157,17 @@ public class MemberProc extends JFrame implements ActionListener {
 		gbAdd(pGender, 1, 3, 3, 1);
 
 		// 이메일
-		JLabel bEmail = new JLabel("이메일 : ");
+		JLabel bEmail = new JLabel("Email : ");
 		tfEmail = new JTextField(20);
 		gbAdd(bEmail, 0, 4, 1, 1);
 		gbAdd(tfEmail, 1, 4, 3, 1);
 
 		// 버튼
 		JPanel pButton = new JPanel();
-		btnInsert = new JButton("가입");
-		btnUpdate = new JButton("수정");
-		btnDelete = new JButton("탈퇴");
-		btnCancel = new JButton("취소");
+		btnInsert = new JButton("JOIN");
+		btnUpdate = new JButton("REVISE");
+		btnDelete = new JButton("LEAVE");
+		btnCancel = new JButton("CANCEL");
 		pButton.add(btnInsert);
 		pButton.add(btnUpdate);
 		pButton.add(btnDelete);
@@ -202,12 +216,12 @@ public class MemberProc extends JFrame implements ActionListener {
 			UpdateMember();
 		} else if (obj == btnDelete) {
 			// int x = JOptionPane.showConfirmDialog(this,"정말 삭제하시겠습니까?");
-			int x = JOptionPane.showConfirmDialog(this, "정말 삭제하시겠습니까?", "삭제", JOptionPane.YES_NO_OPTION);
+			int x = JOptionPane.showConfirmDialog(this, "Do you want to delete it?", "Delete", JOptionPane.YES_NO_OPTION);
 
 			if (x == JOptionPane.OK_OPTION) {
 				deleteMember();
 			} else {
-				JOptionPane.showMessageDialog(this, "삭제를 취소하였습니다.");
+				JOptionPane.showMessageDialog(this, "Cancel");
 			}
 		}
 
@@ -221,8 +235,7 @@ public class MemberProc extends JFrame implements ActionListener {
 		String id = tfId.getText();
 		String pwd = pfPwd.getText();
 		if (pwd.length() == 0) { // 길이가 0이면
-
-			JOptionPane.showMessageDialog(this, "비밀번호를 꼭 입력하세요!");
+			JOptionPane.showMessageDialog(this, "You've entered your Password");
 			return; // 메소드 끝
 		}
 		// System.out.println(mList);
@@ -230,12 +243,12 @@ public class MemberProc extends JFrame implements ActionListener {
 		boolean ok = dao.deleteMember(id, pwd);
 
 		if (ok) {
-			JOptionPane.showMessageDialog(this, "삭제완료");
+			JOptionPane.showMessageDialog(this, "Delete Success");
 			//mList.jTableRefresh();
 			this.dispose();
 
 		} else {
-			JOptionPane.showMessageDialog(this, "삭제실패");
+			JOptionPane.showMessageDialog(this, "Delete Failed");
 
 		}
 
@@ -250,29 +263,26 @@ public class MemberProc extends JFrame implements ActionListener {
 		boolean ok = dao.updateMember(dto);
 
 		if (ok) {
-			JOptionPane.showMessageDialog(this, "수정되었습니다.");
+			JOptionPane.showMessageDialog(this, "Revise");
 			//mList.jTableRefresh();
 			this.dispose();
 		} else {
-			JOptionPane.showMessageDialog(this, "수정실패: 값을 확인하세요");
+			JOptionPane.showMessageDialog(this, "Revise Failed");
 		}
 	}
 
 	private void insertMember() {
-
 		// 화면에서 사용자가 입력한 내용을 얻는다.
 		MemberDTO dto = getViewData();
 		MemberDAO dao = new MemberDAO();
 		boolean ok = dao.insertMember(dto);
-
+		
 		if (ok) {
-			JOptionPane.showMessageDialog(this, "가입이 완료되었습니다.");
+			JOptionPane.showMessageDialog(this, "Welcome to Mini Arcade");
 			//mList.jTableRefresh();
 			dispose();
-
 		} else {
-
-			JOptionPane.showMessageDialog(this, "가입이 정상적으로 처리되지 않았습니다.");
+			JOptionPane.showMessageDialog(this, "Join Fail");
 		}
 
 	}// insertMember

@@ -7,6 +7,7 @@
 package member;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -21,6 +22,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import game.gameLeaderboard;
+
 public class Member_List extends JFrame implements ActionListener, MouseListener {
 
 	Vector v;
@@ -29,7 +32,7 @@ public class Member_List extends JFrame implements ActionListener, MouseListener
 	JTable jTable;
 	JScrollPane pane;
 	JPanel pbtn;
-	JButton btnrefresh;
+	JButton btnrefresh, btnRank1,btnRank2,btnRank3, btnRank4;
 
 	public Member_List() {
 		super("Administrator LeaderBoard");
@@ -46,15 +49,30 @@ public class Member_List extends JFrame implements ActionListener, MouseListener
 		pane = new JScrollPane(jTable);
 		add(pane);
 
-		pbtn = new JPanel();
+		pbtn = new JPanel(new GridLayout(1, 5));
 		btnrefresh = new JButton("Refresh");
+		btnRank1 = new JButton("RPS Rank");
+		btnRank2 = new JButton("NUM Rank");
+		btnRank3 = new JButton("SNAKE Rank");
+		btnRank4 = new JButton("GUESSING Rank");
+		
 		pbtn.add(btnrefresh);
+		pbtn.add(btnRank1);
+		pbtn.add(btnRank2);
+		pbtn.add(btnRank3);
+		pbtn.add(btnRank4);
+		
 		add(pbtn, BorderLayout.NORTH);
 
 		jTable.addMouseListener(this); // 리스너 등록
 		btnrefresh.addActionListener(this); // 회원가입버튼 리스너 등록
+		btnRank1.addActionListener(this);
+		btnRank2.addActionListener(this);
+		btnRank3.addActionListener(this);
+		btnRank4.addActionListener(this);
 
-		setSize(600, 200);
+		setSize(800, 200);
+		this.setLocationRelativeTo(null);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}// end 생성자
@@ -67,7 +85,7 @@ public class Member_List extends JFrame implements ActionListener, MouseListener
 		col.add("name");
 		col.add("gender");
 		col.add("email");
-		col.add("score");
+		//col.add("score");
 
 		return col;
 	}// getColumn
@@ -97,19 +115,18 @@ public class Member_List extends JFrame implements ActionListener, MouseListener
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// 버튼을 클릭하면
-		if (e.getSource() == btnrefresh) {
+		Object obj=e.getSource();
+		if (obj == btnrefresh) {
 			this.jTableRefresh();
-			//new MemberProc(this); //?
-
-			/* 테스트 */
-			// dao = new MemberDAO();
-			// dao.userSelectAll(model);
-			// model.fireTableDataChanged();
-			// jTable.updateUI();
-			// jTable.requestFocusInWindow();
+		} else if(obj == btnRank1) {
+			new gameLeaderboard(1);
+		}else if(obj == btnRank2) {
+			new gameLeaderboard(2);
+		}else if(obj == btnRank3) {
+			new gameLeaderboard(3);
+		}else if(obj == btnRank4) {
+			new gameLeaderboard(4);
 		}
-
 	}
 
 	@Override

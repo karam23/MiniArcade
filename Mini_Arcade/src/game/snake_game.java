@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class snake_game {
@@ -64,7 +65,9 @@ public class snake_game {
 		f1.setTitle("Snake");
 		f1.setSize(300, 300);
 		f1.setLocationRelativeTo(null);
+		//f1.setUndecorated(true); //상단바 없애기
 		f1.setVisible(true);
+		
 		f1.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 	
@@ -80,6 +83,7 @@ public class snake_game {
 		}
 		return con;
 	}
+
 }
 class DataOfSquare {
 	//ArrayList that'll contain the colors
@@ -200,6 +204,7 @@ class ThreadsController extends Thread {
 			 boolean biteItself = posCritique.getX()==positions.get(i).getX() && posCritique.getY()==positions.get(i).getY();
 			 if(biteItself){
 				snake_game.setSnakescore(sizeSnake);
+				JOptionPane.showMessageDialog(null, "GAME OVER, your score "+snake_game.snakescore);
 				stopTheGame();
 			 }
 		 }

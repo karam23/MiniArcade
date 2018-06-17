@@ -81,8 +81,8 @@ public class MemberDAO {
 						JOptionPane.showMessageDialog(null, "Password is incorrect. Please try again.");
 						return false;
 					}
-				} else {
-					JOptionPane.showMessageDialog(null, "Plz enter vaild ID.");
+				}else {
+					//JOptionPane.showMessageDialog(null, "Plz enter vaild ID.");
 					return false;
 				}
 				/*
@@ -167,36 +167,86 @@ public class MemberDAO {
 		return data;
 	}// getMemberList()
 
+	private boolean checkID(String Cid) {
+		Connection con = null;
+		PreparedStatement ps = null; // 동적 쿼리를 이용해보기
+		ResultSet rs;
+		try {
+			con = getConn();
+			String sql = "select id from user;"; // 기본키 체크
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				String id = rs.getString("id");
+				if (id.equals(Cid)) {
+					return false;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+	private boolean checkPwd(String Cpwd) {
+		Connection con = null;
+		PreparedStatement ps = null; // 동적 쿼리를 이용해보기
+		ResultSet rs;
+		try {
+			con = getConn();
+			String sql = "select pwd from user;"; // 기본키 체크
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				String pwd = rs.getString("pwd");
+				if (pwd.equals(Cpwd)) {
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
 	/** 회원 등록 */
 	public boolean insertMember(MemberDTO dto) {
 
 		boolean ok = false;
-
+		boolean tf;
 		Connection con = null; // 연결
 		PreparedStatement ps = null; // 명령
 
 		try {
-
 			con = getConn();
 			String sql = "insert into user(id,pwd,name,gender,email) values(?,?,?,?,?)";
+			String strID = dto.getId();
+			String strPwd = dto.getPwd();
 			String strName = Util.toUnicode(dto.getName());
 			// String strName = new String(dto.getName().getBytes("8859_1"), "UTF-8");
 			// 위에랑 순서 맞추세요!! by라운
-			ps = con.prepareStatement(sql);
-			ps.setString(1, dto.getId());
-			ps.setString(2, dto.getPwd());
-			ps.setString(3, strName);
-			ps.setString(4, dto.getGender());
-			ps.setString(5, dto.getEmail());
-
-			int r = ps.executeUpdate(); // 실행 -> 저장
-			if (r > 0 && insertScore(dto) == true) {
-				System.out.println("가입 성공");
-				ok = true;
-			} else {
-				System.out.println("가입 실패");
+			if (strID.length() < 1 || strPwd.length() < 1) {
+				JOptionPane.showMessageDialog(null, "Plz enter New ID and Password");
+				return false;
 			}
-
+			tf = checkID(strID);
+			if (tf == false) {
+				JOptionPane.showMessageDialog(null, "Be already valid ID");
+				//System.out.println("가입 실패");
+				return false;
+			} else {
+				ps = con.prepareStatement(sql);
+				ps.setString(1, strID);
+				ps.setString(2, strPwd);
+				ps.setString(3, strName);
+				ps.setString(4, dto.getGender());
+				ps.setString(5, dto.getEmail());
+				int r = ps.executeUpdate(); // 실행 -> 저장
+				if (r > 0 && insertScore(dto) == true) {
+					System.out.println("가입 성공");
+					ok = true;
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -223,7 +273,7 @@ public class MemberDAO {
 			ps1.setString(2, "RockPaperScissors");
 			ps1.setString(3, dto.getId());
 			ps1.setInt(4, 0);
-			
+
 			// 02, NumberMole
 			String sqlscore2 = "insert into Game_Score(gameID, gameName, UserID, gameScore) values(?, ?, ?, ?)";
 			ps2 = con.prepareStatement(sqlscore2);
@@ -231,7 +281,7 @@ public class MemberDAO {
 			ps2.setString(2, "NumberMole");
 			ps2.setString(3, dto.getId());
 			ps2.setInt(4, 0);
-			
+
 			// 03, Snake
 			String sqlscore3 = "insert into Game_Score(gameID, gameName, UserID, gameScore) values(?, ?, ?, ?)";
 			ps3 = con.prepareStatement(sqlscore3);
@@ -239,12 +289,12 @@ public class MemberDAO {
 			ps3.setString(2, "Snake");
 			ps3.setString(3, dto.getId());
 			ps3.setInt(4, 0);
-			
+
 			// 04, Tetris
 			String sqlscore4 = "insert into Game_Score(gameID, gameName, UserID, gameScore) values(?, ?, ?, ?)";
 			ps4 = con.prepareStatement(sqlscore4);
 			ps4.setInt(1, 04);
-			ps4.setString(2, "Tetris");
+			ps4.setString(2, "Guessing Num");
 			ps4.setString(3, dto.getId());
 			ps4.setInt(4, 0);
 
@@ -252,9 +302,9 @@ public class MemberDAO {
 			int r2 = ps2.executeUpdate();
 			int r3 = ps3.executeUpdate();
 			int r4 = ps4.executeUpdate();
-			
+
 			if (r1 > 0 && r2 > 0) {
-				if(r3 > 0 && r4 > 0)
+				if (r3 > 0 && r4 > 0)
 					ok = true;
 				else
 					ok = false;
@@ -274,28 +324,34 @@ public class MemberDAO {
 	public boolean updateMember(MemberDTO vMem) {
 		// System.out.println("dto=" + vMem.toString());
 		boolean ok = false;
+		boolean tf;
 		Connection con = null;
 		PreparedStatement ps = null;
 		try {
-
+			String strPwd = vMem.getPwd();
 			con = getConn();
-			String sql = "update user set name=?,gender=?,email=? where id=?"; // and pwd=?";
+			String sql = "update user set name=?,gender=?,email=? where id=? and pwd=?";
 
-			ps = con.prepareStatement(sql);
+			tf = checkPwd(strPwd);
+			if (tf == false) {
+				JOptionPane.showMessageDialog(null, "Incorrect Password");
+				System.out.println("비밀번호 불일치");
+				return false;
+			} else {
+				ps = con.prepareStatement(sql);
+				String strName = Util.toUnicode(vMem.getName());
+				// 이것도 위에 sql이랑 순서 맞추세요
+				ps.setString(1, strName);
+				ps.setString(2, vMem.getGender());
+				ps.setString(3, vMem.getEmail());
+				ps.setString(4, vMem.getId());
+				ps.setString(5, strPwd);
+				int r = ps.executeUpdate(); // 실행 -> 수정
+				// 1~n: 성공 , 0 : 실패
 
-			String strName = Util.toUnicode(vMem.getName());
-			// 이것도 위에 sql이랑 순서 맞추세요
-			ps.setString(1, strName);
-			ps.setString(2, vMem.getGender());
-			ps.setString(3, vMem.getEmail());
-			ps.setString(4, vMem.getId());
-			// ps.setString(5, vMem.getPwd());
-
-			int r = ps.executeUpdate(); // 실행 -> 수정
-			// 1~n: 성공 , 0 : 실패
-
-			if (r > 0)
-				ok = true; // 수정이 성공되면 ok값을 true로 변경
+				if (r > 0)
+					ok = true; // 수정이 성공되면 ok값을 true로 변경
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
